@@ -29,13 +29,33 @@
             Utensils, Clock, MessageSquare, Info
         } = lucide;
 
-        // Custom Icon wrapper for Lucide CDN in React
-        const Icon = ({ name, size = 24, className = "", strokeWidth = 2 }) => {
-            const [iconSvg, setIconSvg] = useState("");
+        // 1. THIS IS THE BLUEPRINT WE WERE MISSING
+        function useLocalStorage(key, initialValue) {
+            const [value, setValue] = useState(() => {
+                const savedItem = localStorage.getItem(key);
+                if (savedItem !== null) {
+                    return JSON.parse(savedItem);
+                }
+                return initialValue;
+            });
+
             useEffect(() => {
-                const svg = lucide.createIcons({
-                    icons: { [name]: lucide[name] },
-                    attrs: { strokeWidth, width: size, height: size, class: className }
+                localStorage.setItem(key, JSON.stringify(value));
+            }, [key, value]);
+
+            return [value, setValue];
+        }
+
+        const App = () => {
+            // 2. THIS IS THE CLEANED UP STATE USING THE BLUEPRINT
+            const [isDarkMode, setIsDarkMode] = useLocalStorage('nexus_theme', true);
+            const [activeTab, setActiveTab] = useLocalStorage('nexus_tab', 'nexus');
+            const [shoulderPain, setShoulderPain] = useLocalStorage('nexus_shoulderPain', 0);
+            const [isDiagnosticActive, setIsDiagnosticActive] = useLocalStorage('nexus_diagnostic', false);
+
+            useEffect(() => {
+                lucide.createIcons();
+            }, [activeTab, isDiagnosticActive, isDarkMode, shoulderPain]);
                 });
             }, [name, size, className]);
             return <i data-lucide={name} className={className}></i>;
@@ -171,3 +191,4 @@ useEffect(() => {
 </body>
 
 </html>
+
