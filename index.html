@@ -42,7 +42,25 @@
         };
 
         const App = () => {
-            const [isDarkMode, setIsDarkMode] = useState(true);
+            // --- UPGRADED DARK MODE STATE ---
+const [isDarkMode, setIsDarkMode] = useState(() => {
+    // 1. Check the filing cabinet when the app first opens
+    const savedTheme = localStorage.getItem('nexus_isDarkMode');
+    
+    // 2. If a saved theme exists, translate it from text back to a boolean (true/false)
+    if (savedTheme !== null) {
+        return JSON.parse(savedTheme);
+    }
+    
+    // 3. If the cabinet is empty (first time user), default to true
+    return true; 
+});
+
+// --- NEW BACKGROUND TASK (SIDE-EFFECT) ---
+useEffect(() => {
+    // Whenever 'isDarkMode' changes, translate it to text and save it to the cabinet
+    localStorage.setItem('nexus_isDarkMode', JSON.stringify(isDarkMode));
+}, [isDarkMode]); // This array tells React: "Only run this task when 'isDarkMode' changes"
             const [activeTab, setActiveTab] = useState('nexus');
             const [shoulderPain, setShoulderPain] = useState(0);
             const [isDiagnosticActive, setIsDiagnosticActive] = useState(false);
@@ -151,4 +169,5 @@
         root.render(<App />);
     </script>
 </body>
+
 </html>
