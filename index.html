@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXUS | Focus Architect</title>
+    <!-- React & Tailwind CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="bg-slate-200 dark:bg-slate-950">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { 
+            Heart, Wallet, Target, RefreshCw, TrendingDown, 
+            Moon, Sun, Plus, Scale, Activity, ShieldAlert, 
+            Utensils, Clock, MessageSquare, Info
+        } = lucide;
+
+        // Custom Icon wrapper for Lucide CDN in React
+        const Icon = ({ name, size = 24, className = "", strokeWidth = 2 }) => {
+            const [iconSvg, setIconSvg] = useState("");
+            useEffect(() => {
+                const svg = lucide.createIcons({
+                    icons: { [name]: lucide[name] },
+                    attrs: { strokeWidth, width: size, height: size, class: className }
+                });
+            }, [name, size, className]);
+            return <i data-lucide={name} className={className}></i>;
+        };
+
+        const App = () => {
+            const [isDarkMode, setIsDarkMode] = useState(true);
+            const [activeTab, setActiveTab] = useState('nexus');
+            const [shoulderPain, setShoulderPain] = useState(0);
+            const [isDiagnosticActive, setIsDiagnosticActive] = useState(false);
+
+            useEffect(() => {
+                lucide.createIcons();
+            }, [activeTab, isDiagnosticActive, isDarkMode, shoulderPain]);
+
+            const handlePainChange = (v) => {
+                setShoulderPain(v);
+                if (v >= 3) setIsDiagnosticActive(true);
+            };
+
+            return (
+                <div className={`${isDarkMode ? 'dark' : ''} h-screen flex items-center justify-center`}>
+                    <div className="w-full max-w-md h-full bg-gray-50 dark:bg-slate-950 flex flex-col relative overflow-hidden shadow-2xl">
+                        
+                        {/* Header */}
+                        <header className="p-8 pb-4 flex justify-between items-center z-10">
+                            <div>
+                                <h1 className="text-2xl font-black tracking-tighter dark:text-white">NEXUS</h1>
+                                <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Focus Architect</p>
+                            </div>
+                            <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-3 bg-white dark:bg-slate-900 rounded-2xl text-gray-400 shadow-sm">
+                                {isDarkMode ? <i data-lucide="sun" size="18"></i> : <i data-lucide="moon" size="18"></i>}
+                            </button>
+                        </header>
+
+                        {/* Content Area */}
+                        <main className="flex-1 overflow-y-auto px-6 space-y-6 pb-32 no-scrollbar">
+                            {isDiagnosticActive ? (
+                                <div className="bg-indigo-600 rounded-[3rem] p-8 text-white shadow-xl animate-in fade-in duration-500">
+                                    <div className="flex items-center gap-2 mb-4 opacity-60">
+                                        <i data-lucide="info" size="16"></i>
+                                        <h4 className="font-black text-[10px] uppercase tracking-widest">System Correlation</h4>
+                                    </div>
+                                    <p className="text-xl font-black leading-tight mb-4">You logged high carbs recently.</p>
+                                    <p className="text-xs opacity-80 leading-relaxed mb-8">Does your left shoulder feel mechanical or inflammatory?</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button onClick={() => setIsDiagnosticActive(false)} className="py-4 bg-rose-500 rounded-2xl font-black text-[10px] uppercase tracking-widest">Mechanical</button>
+                                        <button onClick={() => setIsDiagnosticActive(false)} className="py-4 bg-emerald-500 rounded-2xl font-black text-[10px] uppercase tracking-widest">Inflammatory</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <section className="bg-white dark:bg-slate-900 rounded-[3rem] p-8 border border-gray-100 dark:border-slate-800 shadow-sm">
+                                        <div className="flex justify-between items-center mb-8 px-2">
+                                            <h4 className="font-black text-xs uppercase tracking-widest dark:text-slate-400">Bio-Sync</h4>
+                                            <i data-lucide="heart" class="text-rose-500"></i>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Shoulder Flare-Up</p>
+                                            <div className="flex justify-between gap-1">
+                                                {[0, 1, 2, 3, 4, 5].map(v => (
+                                                    <button key={v} onClick={() => handlePainChange(v)} className={`flex-1 h-12 rounded-2xl font-black transition-all ${shoulderPain === v ? 'bg-rose-500 text-white shadow-lg scale-105' : 'bg-gray-50 dark:bg-slate-800 text-gray-400'}`}>{v}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 shadow-sm">
+                                            <p className="text-[9px] font-black text-gray-400 uppercase mb-2">Weight</p>
+                                            <p className="text-2xl font-black dark:text-white">302.0</p>
+                                            <p className="text-[10px] text-emerald-500 font-bold mt-1 tracking-tighter">-1.2lb/wk</p>
+                                        </div>
+                                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 shadow-sm">
+                                            <p className="text-[9px] font-black text-gray-400 uppercase mb-2">Fast Progress</p>
+                                            <p className="text-2xl font-black dark:text-white">14:22</p>
+                                            <p className="text-[10px] text-gray-400 font-bold mt-1 tracking-tighter">16:8 Window</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-amber-500 rounded-[3rem] p-8 text-white shadow-lg flex justify-between items-center">
+                                        <div>
+                                            <h4 className="font-black text-[10px] uppercase tracking-widest opacity-70 mb-1">Financial Pulse</h4>
+                                            <p className="text-2xl font-black">$4,800.84</p>
+                                        </div>
+                                        <i data-lucide="wallet" size="32" class="opacity-20"></i>
+                                    </div>
+                                </>
+                            )}
+                        </main>
+
+                        {/* Navigation */}
+                        <nav className="h-24 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-gray-100 dark:border-slate-900 flex items-center justify-around px-8 absolute bottom-0 left-0 right-0 z-20 safe-bottom">
+                            <button onClick={() => setActiveTab('bio')} className={`flex flex-col items-center gap-1.5 ${activeTab === 'bio' ? 'text-rose-500 scale-110' : 'text-gray-400'}`}>
+                                <i data-lucide="heart"></i>
+                                <span className="text-[9px] font-black uppercase tracking-widest">Bio</span>
+                            </button>
+                            <button onClick={() => setActiveTab('nexus')} className={`flex flex-col items-center gap-1.5 ${activeTab === 'nexus' ? 'text-indigo-500 scale-110' : 'text-gray-400'}`}>
+                                <i data-lucide="target"></i>
+                                <span className="text-[9px] font-black uppercase tracking-widest">Nexus</span>
+                            </button>
+                            <button onClick={() => setActiveTab('finance')} className={`flex flex-col items-center gap-1.5 ${activeTab === 'finance' ? 'text-amber-500 scale-110' : 'text-gray-400'}`}>
+                                <i data-lucide="wallet"></i>
+                                <span className="text-[9px] font-black uppercase tracking-widest">Wealth</span>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
