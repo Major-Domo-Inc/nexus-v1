@@ -69,6 +69,23 @@ class LinuxSysfs(unittest.TestCase):
             self.assertEqual(hm.main(["--once", "--no-color", "--sysfs-root", self.root]), 3)
 
 
+class NoConsole(unittest.TestCase):
+    def test_runs_with_no_stdout_like_pythonw(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        log = os.path.join(tmp.name, "temps.csv")
+        old, sys.stdout = sys.stdout, None
+        try:
+            code = hm.main(["--demo", "--once", "--log", log])
+        finally:
+            sys.stdout = old
+        self.assertEqual(code, hm.OK)
+        with open(log) as f:
+            rows = f.read().splitlines()
+        self.assertEqual(rows[0], "timestamp,source,sensor,temp_c,level")
+        self.assertEqual(len(rows), 1 + 7)  # header + 7 demo sensors
+
+
 class Parsers(unittest.TestCase):
     def test_powermetrics(self):
         temps, pressure = hm.parse_powermetrics(

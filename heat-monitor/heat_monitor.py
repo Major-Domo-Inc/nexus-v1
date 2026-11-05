@@ -119,7 +119,9 @@ def _first_float(text: Optional[str]) -> Optional[float]:
 
 def _run(cmd: List[str], timeout: float = 10) -> Optional[str]:
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        # On Windows, don't flash a console window for every PowerShell call.
+        flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, creationflags=flags)
     except (OSError, subprocess.SubprocessError):
         return None
     return r.stdout if r.returncode == 0 else None
@@ -605,6 +607,10 @@ def run_once(args, read, pattern) -> int:
     snap = filtered(read(), pattern)
     tr = Tracker(warn=args.warn, crit=args.crit)
     tr.update(snap)
+    if args.log:
+        log = CsvLog(args.log)
+        log.write(snap, tr)
+        log.close()
     if args.json:
         print(json.dumps({
             "host": socket.gethostname(),
@@ -659,6 +665,11 @@ def run_live(args, read, pattern) -> int:
     return 0
 
 
+def _is_tty() -> bool:
+    # sys.stdout is None under pythonw/pyw (Windows background runs).
+    return sys.stdout is not None and sys.stdout.isatty()
+
+
 def parse_args(argv=None):
     p = argparse.ArgumentParser(
         prog="heat_monitor",
@@ -681,7 +692,7 @@ def parse_args(argv=None):
     args = p.parse_args(argv)
     if args.interval <= 0:
         p.error("--interval must be positive")
-    args.color = not args.no_color and sys.stdout.isatty() and "NO_COLOR" not in os.environ
+    args.color = not args.no_color and _is_tty() and "NO_COLOR" not in os.environ
     return args
 
 
@@ -701,7 +712,7 @@ def main(argv=None) -> int:
     read = make_reader(args.demo, args.sysfs_root)
     if args.once or args.json:
         return run_once(args, read, pattern)
-    if not sys.stdout.isatty():
+    if not _is_tty():
         print("Not a terminal; use --once or --json for a single reading.", file=sys.stderr)
         return 64
     return run_live(args, read, pattern)
